@@ -105,13 +105,15 @@ public class Geldbetrag
      * @param multiplikator
      * @return The money depicted by this object
      *
-     * @require geldbetrag != null && multiplikator > 0
+     * @require geldbetrag != null 
+	 * @require multiplikator >= 0
      * @require Geldbetrag.istMulitplizierenMoeglich(geldbetrag, multiplikator)
      */
     public static Geldbetrag multipliziere(Geldbetrag geldbetrag, int multiplikator)
     {
-        assert geldbetrag != null && multiplikator > 0: "Vorbedingung verletzt";
-        assert Geldbetrag.istMulitplizierenMoeglich(geldbetrag, multiplikator): "Vorbedingung verletzt";
+        assert geldbetrag != null : "Vorbedingung verletzt";
+        assert multiplikator >= 0 : "Vorbedingung verletzt";
+        assert Geldbetrag.istMulitplizierenMoeglich(geldbetrag, multiplikator) : "Vorbedingung verletzt";
         
         return Geldbetrag.select(geldbetrag._eurocent * multiplikator);
     }
@@ -123,7 +125,7 @@ public class Geldbetrag
      */
     public static boolean istValiderGeldbetragString(String geldbetragString)
     {
-    	return geldbetragString.matches("^-?([1-9]\\d{1,}|\\d),\\d{2}$");
+    	return geldbetragString.matches("^-?([1-9]\\d{1,3}|\\d),\\d{2}$");
     }
 
     /**
@@ -184,7 +186,7 @@ public class Geldbetrag
      */
     public static boolean istMulitplizierenMoeglich(Geldbetrag geldbetrag, int multiplikator)
     {
-    	return geldbetrag._eurocent * multiplikator >= geldbetrag._eurocent;
+    	return geldbetrag._eurocent * multiplikator >= geldbetrag._eurocent || multiplikator == 0;
     }
     
     /**

@@ -169,21 +169,32 @@ public class BarzahlungsWerkzeug extends ObservableSubwerkzeug
     	// TODO
         if (eingabePreis.isEmpty())
         {
-            eingabePreis = "0";
+            eingabePreis = "0,00";
         }
 
+        Geldbetrag eingabeBetrag = null;
       	if (Geldbetrag.istValiderGeldbetragString(eingabePreis))
        	{
-            Geldbetrag eingabeBetrag = Geldbetrag.parse(eingabePreis);
-            Geldbetrag differenz = Geldbetrag.subtrahiere(eingabeBetrag, _preis);
-            _ausreichenderGeldbetrag = differenz.istPositiv();
-            zeigeRestbetrag(differenz);
+            eingabeBetrag = Geldbetrag.parse(eingabePreis);
        	}
        	else
        	{
        		_ausreichenderGeldbetrag = false;
-               zeigeFehlertext();
+            zeigeFehlertext();
        	}
+      	
+      	if (eingabeBetrag != null && Geldbetrag.istSubtrahierenMoeglich(eingabeBetrag, _preis))
+        {
+            Geldbetrag differenz = Geldbetrag.subtrahiere(eingabeBetrag, _preis);
+            _ausreichenderGeldbetrag = differenz.istPositiv();
+            zeigeRestbetrag(differenz);
+        }
+       	else
+       	{
+       		_ausreichenderGeldbetrag = false;
+            zeigeFehlertext();
+       	}
+      	
         zeigeAusreichenderGeldbetragStatus();
     }
 
