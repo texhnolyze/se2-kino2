@@ -21,9 +21,9 @@ public class GeldbetragTest
     @Test
     public void testParse()
     {
-        assertEquals(Geldbetrag.select(0), Geldbetrag.parse("00,00"));
-        assertEquals(Geldbetrag.select(100), Geldbetrag.parse("01,00"));
-        assertEquals(Geldbetrag.select(-150), Geldbetrag.parse("-01,50"));
+        assertEquals(Geldbetrag.select(0), Geldbetrag.parse("0,00"));
+        assertEquals(Geldbetrag.select(100), Geldbetrag.parse("1,00"));
+        assertEquals(Geldbetrag.select(-150), Geldbetrag.parse("-1,50"));
         assertEquals(Geldbetrag.select(-150099), Geldbetrag.parse("-1500,99"));
         assertEquals(Geldbetrag.select(150099), Geldbetrag.parse("1500,99"));
     }
@@ -31,9 +31,9 @@ public class GeldbetragTest
     @Test
     public void testToString()
     {
-        assertEquals("00,00", Geldbetrag.select(0).toString());
-        assertEquals("01,00", Geldbetrag.select(100).toString());
-        assertEquals("-01,50", Geldbetrag.select(-150).toString());
+        assertEquals("0,00", Geldbetrag.select(0).toString());
+        assertEquals("1,00", Geldbetrag.select(100).toString());
+        assertEquals("-1,50", Geldbetrag.select(-150).toString());
         assertEquals("-1500,99", Geldbetrag.select(-150099).toString());
         assertEquals("1500,99", Geldbetrag.select(150099).toString());
     }
@@ -75,7 +75,7 @@ public class GeldbetragTest
         Geldbetrag geldbetrag2 = Geldbetrag.select(100);
         Geldbetrag ergebnisGeldbetrag = Geldbetrag.select(200);
 
-        assertEquals(Geldbetrag.addiere(geldbetrag1, geldbetrag2), ergebnisGeldbetrag);
+        assertEquals(Geldbetrag.subtrahiere(geldbetrag1, geldbetrag2), ergebnisGeldbetrag);
     }
 
     @Test
@@ -111,16 +111,26 @@ public class GeldbetragTest
     @Test public void isValidGeldbetragString()
     {
         String validerGeldString = "9999,88";
+        String validerGeldString1 = "-99,98";
         String invaliderGeldString1 = "9999,8";
         String invaliderGeldString2 = ",8";
         String invaliderGeldString3 = "1,8";
         String invaliderGeldString4 = "10,88€";
+        String invaliderGeldString5 = "10,989";
+        String invaliderGeldString6 = "aa,98";
+        String invaliderGeldString7 = "5,bb";
+        String invaliderGeldString8 = "--99,98";
 
         assertTrue(Geldbetrag.istValiderGeldbetragString(validerGeldString));
+        assertTrue(Geldbetrag.istValiderGeldbetragString(validerGeldString1));
         assertFalse(Geldbetrag.istValiderGeldbetragString(invaliderGeldString1));
         assertFalse(Geldbetrag.istValiderGeldbetragString(invaliderGeldString2));
         assertFalse(Geldbetrag.istValiderGeldbetragString(invaliderGeldString3));
         assertFalse(Geldbetrag.istValiderGeldbetragString(invaliderGeldString4));
+        assertFalse(Geldbetrag.istValiderGeldbetragString(invaliderGeldString5));
+        assertFalse(Geldbetrag.istValiderGeldbetragString(invaliderGeldString6));
+        assertFalse(Geldbetrag.istValiderGeldbetragString(invaliderGeldString7));
+        assertFalse(Geldbetrag.istValiderGeldbetragString(invaliderGeldString8));
     }
 
     @Test public void istAddierenMoeglich()
@@ -166,5 +176,14 @@ public class GeldbetragTest
 
         assertTrue(Geldbetrag.istMulitplizierenMoeglich(geldbetrag, multiplikator));
         assertFalse(Geldbetrag.istMulitplizierenMoeglich(maxGeldbetrag, multiplikator));
+    }
+    
+    @Test public void istPositiv()
+    {
+        Geldbetrag positiverGeldbetrag = Geldbetrag.select(1000);
+        Geldbetrag negativerGeldbetrag = Geldbetrag.select(-100);
+        
+        assertTrue(positiverGeldbetrag.istPositiv());
+        assertFalse(negativerGeldbetrag.istPositiv());
     }
 }

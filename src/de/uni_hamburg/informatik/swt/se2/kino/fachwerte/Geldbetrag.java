@@ -38,9 +38,12 @@ public class Geldbetrag
      *
      * @require isValidGeldbetragString(geldString)
      */
-    public static Geldbetrag parse(String geldString)
+    public static Geldbetrag parse(final String geldString)
     {
         assert Geldbetrag.istValiderGeldbetragString(geldString) : "Vorbedingung verletzt";
+        
+        String geldStringWoutComma = geldString.replace(",", "");
+        return Geldbetrag.select(Integer.valueOf(geldStringWoutComma));
     }
 
     /**
@@ -56,7 +59,7 @@ public class Geldbetrag
     	if (Math.signum(_eurocent) == -1.0)
     		vorzeichen = "-";
 
-        return vorzeichen + Math.abs(_eurocent / 100) + "," + String.format("%02d", Math.abs(_eurocent) % 100) + "€";
+        return vorzeichen + Math.abs(_eurocent / 100) + "," + String.format("%02d", Math.abs(_eurocent) % 100);
     }
 
     /**
@@ -73,6 +76,8 @@ public class Geldbetrag
     {
         assert geldbetrag1 != null && geldbetrag2 != null: "Vorbedingung verletzt";
         assert Geldbetrag.istAddierenMoeglich(geldbetrag1, geldbetrag2): "Vorbedingung verletzt";
+        
+        return Geldbetrag.select(geldbetrag1._eurocent + geldbetrag2._eurocent);
     }
 
     /**
@@ -89,6 +94,8 @@ public class Geldbetrag
     {
         assert geldbetrag1 != null && geldbetrag2 != null: "Vorbedingung verletzt";
         assert Geldbetrag.istSubtrahierenMoeglich(geldbetrag1, geldbetrag2): "Vorbedingung verletzt";
+        
+        return Geldbetrag.select(geldbetrag1._eurocent - geldbetrag2._eurocent);
     }
 
     /**
@@ -105,21 +112,88 @@ public class Geldbetrag
     {
         assert geldbetrag != null && multiplikator > 0: "Vorbedingung verletzt";
         assert Geldbetrag.istMulitplizierenMoeglich(geldbetrag, multiplikator): "Vorbedingung verletzt";
+        
+        return Geldbetrag.select(geldbetrag._eurocent * multiplikator);
     }
 
+    /**
+     * Prueft, ob ein String einen validen Geldbetrag repraesentiert.
+     * @param geldbetragString String, der gecheckt werden soll
+     * @return true wenn moeglich, sonst false
+     */
     public static boolean istValiderGeldbetragString(String geldbetragString)
     {
+    	return geldbetragString.matches("^-?([1-9]\\d{1,}|\\d),\\d{2}$");
     }
 
+    /**
+     * Prueft, ob ein Addieren zweier Geldbetraege moeglich ist.
+     * @param geldbetrag1 der Geldbetrag, auf den draufaddiert werden soll
+     * @param geldbetrag2 der Geldbetrag, der addiert werden soll
+     * @return true wenn moeglich, sonst false
+     */
     public static boolean istAddierenMoeglich(Geldbetrag geldbetrag1, Geldbetrag geldbetrag2)
-    {
+    {   	
+    	if (geldbetrag1.istPositiv() && geldbetrag2.istPositiv())  // beide positiv --> overflow
+    	{
+    		return (geldbetrag1._eurocent + geldbetrag2._eurocent >= Math.max(geldbetrag1._eurocent, geldbetrag2._eurocent));
+    	}
+    	else if (!geldbetrag1.istPositiv() && !geldbetrag2.istPositiv())  // beide negativ --> underflow
+    	{
+    		return (geldbetrag1._eurocent + geldbetrag2._eurocent <= Math.min(geldbetrag1._eurocent, geldbetrag2._eurocent));
+    	}
+    	else
+    	{
+    		return true;
+    	}
     }
 
+    /**
+     * Prueft, ob ein Subtrahieren zweier Geldbetraege moeglich ist.
+     * @param geldbetrag1 der Geldbetrag, von dem abgezogen werden soll
+     * @param geldbetrag2 der Geldbetrag, der abgezogen werden soll
+     * @return true wenn moeglich, sonst false
+     */
     public static boolean istSubtrahierenMoeglich(Geldbetrag geldbetrag1, Geldbetrag geldbetrag2)
     {
+    	if (geldbetrag1.istPositiv() && geldbetrag2.istPositiv())  // beide positiv --> underflow
+    	{
+    		return (geldbetrag1._eurocent - geldbetrag2._eurocent <= geldbetrag1._eurocent);
+    	}
+    	else if (!geldbetrag1.istPositiv() && !geldbetrag2.istPositiv())  // beide negativ --> overflow
+    	{
+    		return (geldbetrag1._eurocent - geldbetrag2._eurocent >= geldbetrag1._eurocent);
+    	}
+    	else
+    	{
+    		int minVal = Math.min(geldbetrag1._eurocent, geldbetrag2._eurocent);
+    		int maxVal = Math.max(geldbetrag1._eurocent, geldbetrag2._eurocent);
+    		
+    		int deltaLow = minVal - Integer.MIN_VALUE;
+    		int deltaHigh = Integer.MAX_VALUE - maxVal;
+    		
+    		return (maxVal <= deltaLow && Math.abs(minVal) <= deltaHigh);
+    	}
     }
 
-    public static boolean istMulitplizierenMoeglich(Geldbetrag geldbetrag1, int mulitplikator)
+    /**
+     * Prueft, ob ein Multiplizieren von geldbetrag mit multiplikator moeglich ist.
+     * @param geldbetrag der zu multiplizierende Geldbetrag
+     * @param multiplikator der Multiplikator
+     * @return true wenn moeglich, sonst false
+     */
+    public static boolean istMulitplizierenMoeglich(Geldbetrag geldbetrag, int multiplikator)
     {
+    	return geldbetrag._eurocent * multiplikator >= geldbetrag._eurocent;
+    }
+    
+    /**
+     * Prueft, ob ein Geldbetrag positiv ist.
+     * 
+     * @return true, wenn positiv, sonst false
+     */
+    public boolean istPositiv()
+    {
+    	return Math.signum(_eurocent) >= 0;
     }
 }

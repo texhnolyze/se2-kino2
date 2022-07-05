@@ -3,6 +3,7 @@ package de.uni_hamburg.informatik.swt.se2.kino.materialien;
 import java.util.Set;
 
 import de.uni_hamburg.informatik.swt.se2.kino.fachwerte.Datum;
+import de.uni_hamburg.informatik.swt.se2.kino.fachwerte.Geldbetrag;
 import de.uni_hamburg.informatik.swt.se2.kino.fachwerte.Platz;
 import de.uni_hamburg.informatik.swt.se2.kino.fachwerte.Uhrzeit;
 
@@ -25,7 +26,7 @@ public class Vorstellung
     /**
      * @TODO: durch @Geldbetrag ersetzen
      */
-    private int _preis;
+    private Geldbetrag _preis;
     private boolean[][] _verkauft;
     private int _anzahlVerkauftePlaetze;
 
@@ -36,7 +37,7 @@ public class Vorstellung
      * @param film der Film, der in dieser Vorstellung gezeigt wird.
      * @param anfangszeit die Anfangszeit der Vorstellung.
      * @param endzeit die Endzeit der Vorstellung.
-     * @param preis der Verkaufspreis in Eurocent für Karten zu dieser
+     * @param geldbetrag.istPositiv() der Verkaufspreis in Eurocent für Karten zu dieser
      *            Vorstellung.
      * 
      * @require kinosaal != null
@@ -44,7 +45,7 @@ public class Vorstellung
      * @require anfangszeit != null
      * @require endzeit != null
      * @require datum != null
-     * @require preis >= 0
+     * @require preis.istPositiv()
      * 
      * @ensure getKinosaal() == kinosaal
      * @ensure getFilm() == film
@@ -54,21 +55,21 @@ public class Vorstellung
      * @ensure getPreis() == preis
      */
     public Vorstellung(Kinosaal kinosaal, Film film, Uhrzeit anfangszeit,
-            Uhrzeit endzeit, Datum datum, int preis)
+            Uhrzeit endzeit, Datum datum, Geldbetrag geldbetrag)
     {
         assert kinosaal != null : "Vorbedingung verletzt: saal != null";
         assert film != null : "Vorbedingung verletzt: film != null";
         assert anfangszeit != null : "Vorbedingung verletzt: anfangszeit != null";
         assert endzeit != null : "Vorbedingung verletzt: endzeit != null";
         assert datum != null : "Vorbedingung verletzt: datum != null";
-        assert preis >= 0: "Vorbedingung verletzt: preis >= 0";
+        assert geldbetrag.istPositiv(): "Vorbedingung verletzt: preis >= 0";
 
         _kinosaal = kinosaal;
         _film = film;
         _anfangszeit = anfangszeit;
         _endzeit = endzeit;
         _datum = datum;
-        _preis = preis;
+        _preis = geldbetrag;
         _verkauft = new boolean[kinosaal.getAnzahlReihen()][kinosaal
                 .getAnzahlSitzeProReihe()];
         _anzahlVerkauftePlaetze = 0;
@@ -129,7 +130,7 @@ public class Vorstellung
      * zurück.
      * 
      */
-    public int getPreis()
+    public Geldbetrag getPreis()
     {
         return _preis;
     }
@@ -186,15 +187,15 @@ public class Vorstellung
      * 
      * @param plaetze die Sitzplätze.
      * 
-     * @return Gesamtpreis in Eurocent
+     * @return Gesamtpreis als Geldbetrag
      * 
      * @require hatPlaetze(plaetze)
      */
-    public int getPreisFuerPlaetze(Set<Platz> plaetze)
+    public Geldbetrag getPreisFuerPlaetze(Set<Platz> plaetze)
     {
         assert hatPlaetze(plaetze) : "Vorbedingung verletzt: hatPlaetze(plaetze)";
 
-        return _preis * plaetze.size();
+        return Geldbetrag.multipliziere(_preis, plaetze.size());
     }
 
     /**
