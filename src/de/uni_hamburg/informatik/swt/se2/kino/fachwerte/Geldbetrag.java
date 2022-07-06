@@ -5,7 +5,7 @@ import java.util.HashMap;
 public class Geldbetrag
 {
 	// Limitieren valider Geldbetraege auf 7 Stellen vor dem Komma, 9 Stellen insgesamt.
-	// , Java int kann problemlos 9 Stellen insgesamt.
+	// Java int kann problemlos 9 Stellen insgesamt.
 	private static final int MAX_DIGITS = 9;
 	public static final int MAX_VALUE = (int) Math.pow(10, MAX_DIGITS) - 1;
 	public static final int MIN_VALUE = -MAX_VALUE;
@@ -68,7 +68,7 @@ public class Geldbetrag
     	int euro = Math.abs(_eurocent / 100);
     	int cent = Math.abs(_eurocent) % 100;
     	
-        return vorzeichen + euro + "," + String.format("%02d", cent);
+        return String.format("%s%d,%02d", vorzeichen, euro, cent);
     }
 
     /**
