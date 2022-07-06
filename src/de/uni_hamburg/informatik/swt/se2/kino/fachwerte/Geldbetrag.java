@@ -64,11 +64,10 @@ public class Geldbetrag
     @Override
     public String toString()
     {
-    	String vorzeichen = Math.signum(_eurocent) == -1.0 ? "-" : "";
-    	int euro = Math.abs(_eurocent / 100);
+    	int euro = _eurocent / 100;
     	int cent = Math.abs(_eurocent) % 100;
     	
-        return String.format("%s%d,%02d", vorzeichen, euro, cent);
+        return String.format("%d,%02d", euro, cent);
     }
 
     /**
