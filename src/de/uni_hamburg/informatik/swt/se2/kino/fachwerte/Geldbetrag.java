@@ -4,6 +4,12 @@ import java.util.HashMap;
 
 public class Geldbetrag
 {
+	// Limitieren valider Geldbetraege auf 7 Stellen vor dem Komma, 9 Stellen insgesamt.
+	// , Java int kann problemlos 9 Stellen insgesamt.
+	private static final int MAX_DIGITS = 9;
+	public static final int MAX_VALUE = (int) Math.pow(10, MAX_DIGITS) - 1;
+	public static final int MIN_VALUE = -MAX_VALUE;
+	
     private final int _eurocent;
     private static final HashMap<Integer, Geldbetrag> UNIVERSUM = new HashMap<>();
 
@@ -18,9 +24,13 @@ public class Geldbetrag
      *
      * @param eurocent The amount of Euro Cents
      * @return A @Geldbetrag object depicting the eurocents passed via argument
+     * 
+     * @require istValiderGeldbetrag(eurocent)
      */
     public static Geldbetrag select(int eurocent)
     {
+    	assert istValiderGeldbetrag(eurocent) : "Vorbedingung verletzt";
+    	
         if (!UNIVERSUM.containsKey(eurocent))
         {
             UNIVERSUM.put(eurocent, new Geldbetrag(eurocent));
@@ -54,12 +64,11 @@ public class Geldbetrag
     @Override
     public String toString()
     {
-    	String vorzeichen = "";
-
-    	if (Math.signum(_eurocent) == -1.0)
-    		vorzeichen = "-";
-
-        return vorzeichen + Math.abs(_eurocent / 100) + "," + String.format("%02d", Math.abs(_eurocent) % 100);
+    	String vorzeichen = Math.signum(_eurocent) == -1.0 ? "-" : "";
+    	int euro = Math.abs(_eurocent / 100);
+    	int cent = Math.abs(_eurocent) % 100;
+    	
+        return vorzeichen + euro + "," + String.format("%02d", cent);
     }
 
     /**
@@ -69,12 +78,14 @@ public class Geldbetrag
      * @param geldbetrag2
      * @return The money depicted by this object
      *
-     * @require geldbetrag1 != null && geldbetrag2 != null
+     * @require geldbetrag1 != null
+	 * @require geldbetrag2 != null
      * @require istAddierenMoeglich(geldbetrag1, geldbetrag2)
      */
     public static Geldbetrag addiere(Geldbetrag geldbetrag1, Geldbetrag geldbetrag2)
     {
-        assert geldbetrag1 != null && geldbetrag2 != null: "Vorbedingung verletzt";
+        assert geldbetrag1 != null : "Vorbedingung verletzt";
+        assert geldbetrag2 != null : "Vorbedingung verletzt";
         assert Geldbetrag.istAddierenMoeglich(geldbetrag1, geldbetrag2): "Vorbedingung verletzt";
         
         return Geldbetrag.select(geldbetrag1._eurocent + geldbetrag2._eurocent);
@@ -87,12 +98,14 @@ public class Geldbetrag
      * @param geldbetrag2
      * @return The money depicted by this object
      *
-     * @require geldbetrag1 != null && geldbetrag2 != null
+     * @require geldbetrag1 != null
+     * @require geldbetrag2 != null
      * @require Geldbetrag.istSubtrahierenMoeglich(geldbetrag1, geldbetrag2)
      */
     public static Geldbetrag subtrahiere(Geldbetrag geldbetrag1, Geldbetrag geldbetrag2)
     {
-        assert geldbetrag1 != null && geldbetrag2 != null: "Vorbedingung verletzt";
+        assert geldbetrag1 != null : "Vorbedingung verletzt";
+        assert geldbetrag2 != null : "Vorbedingung verletzt";
         assert Geldbetrag.istSubtrahierenMoeglich(geldbetrag1, geldbetrag2): "Vorbedingung verletzt";
         
         return Geldbetrag.select(geldbetrag1._eurocent - geldbetrag2._eurocent);
@@ -125,7 +138,12 @@ public class Geldbetrag
      */
     public static boolean istValiderGeldbetragString(String geldbetragString)
     {
-    	return geldbetragString.matches("^-?([1-9]\\d{1,3}|\\d),\\d{2}$");
+    	return geldbetragString.matches("^-?([1-9]\\d{1," + (MAX_DIGITS - 3) + "}|\\d),\\d{2}$");
+    }
+    
+    public static boolean istValiderGeldbetrag(int eurocent)
+    {
+    	return eurocent >= MIN_VALUE && eurocent <= MAX_VALUE;
     }
 
     /**
@@ -136,13 +154,17 @@ public class Geldbetrag
      */
     public static boolean istAddierenMoeglich(Geldbetrag geldbetrag1, Geldbetrag geldbetrag2)
     {   	
+    	int maxVal = Math.max(geldbetrag1._eurocent, geldbetrag2._eurocent);
+    	int minVal = Math.min(geldbetrag1._eurocent, geldbetrag2._eurocent);
+    	int summe = geldbetrag1._eurocent + geldbetrag2._eurocent;
+    	
     	if (geldbetrag1.istPositiv() && geldbetrag2.istPositiv())  // beide positiv --> overflow
     	{
-    		return (geldbetrag1._eurocent + geldbetrag2._eurocent >= Math.max(geldbetrag1._eurocent, geldbetrag2._eurocent));
+    		return (summe >= maxVal) &&	(summe <= MAX_VALUE);
     	}
-    	else if (!geldbetrag1.istPositiv() && !geldbetrag2.istPositiv())  // beide negativ --> underflow
+    	else if (!(geldbetrag1.istPositiv() || geldbetrag2.istPositiv()))  // beide negativ --> underflow
     	{
-    		return (geldbetrag1._eurocent + geldbetrag2._eurocent <= Math.min(geldbetrag1._eurocent, geldbetrag2._eurocent));
+    		return (summe <= minVal) &&	(summe >= MIN_VALUE);
     	}
     	else
     	{
@@ -158,21 +180,22 @@ public class Geldbetrag
      */
     public static boolean istSubtrahierenMoeglich(Geldbetrag geldbetrag1, Geldbetrag geldbetrag2)
     {
+    	int maxVal = Math.max(geldbetrag1._eurocent, geldbetrag2._eurocent);
+    	int minVal = Math.min(geldbetrag1._eurocent, geldbetrag2._eurocent);
+    	int differenz = geldbetrag1._eurocent - geldbetrag2._eurocent;
+    	
     	if (geldbetrag1.istPositiv() && geldbetrag2.istPositiv())  // beide positiv --> underflow
     	{
-    		return (geldbetrag1._eurocent - geldbetrag2._eurocent <= geldbetrag1._eurocent);
+    		return (differenz <= geldbetrag1._eurocent) && (differenz >= MIN_VALUE);
     	}
-    	else if (!geldbetrag1.istPositiv() && !geldbetrag2.istPositiv())  // beide negativ --> overflow
+    	else if (!(geldbetrag1.istPositiv() || geldbetrag2.istPositiv()))  // beide negativ --> overflow
     	{
-    		return (geldbetrag1._eurocent - geldbetrag2._eurocent >= geldbetrag1._eurocent);
+    		return (differenz >= geldbetrag1._eurocent) && (differenz <= MAX_VALUE);
     	}
     	else
-    	{
-    		int minVal = Math.min(geldbetrag1._eurocent, geldbetrag2._eurocent);
-    		int maxVal = Math.max(geldbetrag1._eurocent, geldbetrag2._eurocent);
-    		
-    		int deltaLow = minVal - Integer.MIN_VALUE;
-    		int deltaHigh = Integer.MAX_VALUE - maxVal;
+    	{    		
+    		int deltaLow = minVal - MIN_VALUE;
+    		int deltaHigh = MAX_VALUE - maxVal;
     		
     		return (maxVal <= deltaLow && Math.abs(minVal) <= deltaHigh);
     	}
@@ -186,7 +209,9 @@ public class Geldbetrag
      */
     public static boolean istMulitplizierenMoeglich(Geldbetrag geldbetrag, int multiplikator)
     {
-    	return geldbetrag._eurocent * multiplikator >= geldbetrag._eurocent || multiplikator == 0;
+    	int product = geldbetrag._eurocent * multiplikator;
+    	
+    	return (product >= geldbetrag._eurocent && product <= MAX_VALUE) || multiplikator == 0;
     }
     
     /**

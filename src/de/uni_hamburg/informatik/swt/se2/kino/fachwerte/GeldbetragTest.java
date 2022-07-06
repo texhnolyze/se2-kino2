@@ -120,6 +120,8 @@ public class GeldbetragTest
         String invaliderGeldString6 = "aa,98";
         String invaliderGeldString7 = "5,bb";
         String invaliderGeldString8 = "--99,98";
+        String invaliderGeldString9 = "10000000,00";
+        String invaliderGeldString10 = "-10000000,00";
 
         assertTrue(Geldbetrag.istValiderGeldbetragString(validerGeldString));
         assertTrue(Geldbetrag.istValiderGeldbetragString(validerGeldString1));
@@ -131,6 +133,19 @@ public class GeldbetragTest
         assertFalse(Geldbetrag.istValiderGeldbetragString(invaliderGeldString6));
         assertFalse(Geldbetrag.istValiderGeldbetragString(invaliderGeldString7));
         assertFalse(Geldbetrag.istValiderGeldbetragString(invaliderGeldString8));
+        assertFalse(Geldbetrag.istValiderGeldbetragString(invaliderGeldString9));
+        assertFalse(Geldbetrag.istValiderGeldbetragString(invaliderGeldString10));
+    }
+    
+    @Test
+    public void istValiderGeldbetrag()
+    {
+    	assertTrue(Geldbetrag.istValiderGeldbetrag(0));
+    	assertTrue(Geldbetrag.istValiderGeldbetrag(999999999));
+    	assertTrue(Geldbetrag.istValiderGeldbetrag(-999999999));
+    	assertFalse(Geldbetrag.istValiderGeldbetrag(Integer.MAX_VALUE));
+    	assertFalse(Geldbetrag.istValiderGeldbetrag(Integer.MIN_VALUE));
+    	
     }
 
     @Test public void istAddierenMoeglich()
@@ -139,8 +154,8 @@ public class GeldbetragTest
         Geldbetrag positiverGeldbetrag = Geldbetrag.select(3);
         Geldbetrag negativerGeldbetrag = Geldbetrag.select(-3);
 
-        Geldbetrag maxGeldbetrag = Geldbetrag.select(Integer.MAX_VALUE);
-        Geldbetrag minGeldbetrag = Geldbetrag.select(Integer.MIN_VALUE);
+        Geldbetrag maxGeldbetrag = Geldbetrag.select(Geldbetrag.MAX_VALUE);
+        Geldbetrag minGeldbetrag = Geldbetrag.select(Geldbetrag.MIN_VALUE);
 
         assertTrue(Geldbetrag.istAddierenMoeglich(geldbetrag, positiverGeldbetrag));
         assertTrue(Geldbetrag.istAddierenMoeglich(geldbetrag, positiverGeldbetrag));
@@ -156,8 +171,8 @@ public class GeldbetragTest
         Geldbetrag positiverGeldbetrag = Geldbetrag.select(3);
         Geldbetrag negativerGeldbetrag = Geldbetrag.select(-3);
 
-        Geldbetrag maxGeldbetrag = Geldbetrag.select(Integer.MAX_VALUE);
-        Geldbetrag minGeldbetrag = Geldbetrag.select(Integer.MIN_VALUE);
+        Geldbetrag maxGeldbetrag = Geldbetrag.select(Geldbetrag.MAX_VALUE);
+        Geldbetrag minGeldbetrag = Geldbetrag.select(Geldbetrag.MIN_VALUE);
 
         assertTrue(Geldbetrag.istSubtrahierenMoeglich(geldbetrag, positiverGeldbetrag));
         assertTrue(Geldbetrag.istSubtrahierenMoeglich(geldbetrag, positiverGeldbetrag));
@@ -172,7 +187,7 @@ public class GeldbetragTest
         Geldbetrag geldbetrag = Geldbetrag.select(1000);
         int multiplikator = 3;
 
-        Geldbetrag maxGeldbetrag = Geldbetrag.select(Integer.MAX_VALUE);
+        Geldbetrag maxGeldbetrag = Geldbetrag.select(Geldbetrag.MAX_VALUE);
 
         assertTrue(Geldbetrag.istMulitplizierenMoeglich(geldbetrag, multiplikator));
         assertFalse(Geldbetrag.istMulitplizierenMoeglich(maxGeldbetrag, multiplikator));
